@@ -1,64 +1,31 @@
-from selenium import webdriver
 import time
 
-PATH = "C:/Users/Extramarks_Indonesia/Documents/AutoReplyWa/chromedriver" # Ganti dengan sesuai dengan tempat drive anda berada
-driver = webdriver.Chrome(PATH)
-driver.get("https://web.whatsapp.com/")
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
+
+browser_options = webdriver.ChromeOptions()
+browser_options.add_argument('--user-data-dir=/Users/Extramarks_Indonesia/AppData/Local/Google/Chrome/User Data/Default')
+
+driver = webdriver.Chrome('C:/Users/Extramarks_Indonesia/Documents/UnreadChatWAbot/chromedriver',
+                          options = browser_options) #change chromedriver path
+driver.get("http://web.whatsapp.com/")
+wait = WebDriverWait(driver, 50)
+element = wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="side"]/header/div[1]/div')))
 driver.maximize_window()
-
-# Jeda waktu untuk melakukan Scan QR Code
-time.sleep(10)
-
-# Isi pesan yang akan dikirim
-text1 = "Hai "
-text2 = ", Kami sedang sibuk saat ini , tunggu beberapa saat"
-
-# Daftar nama yang akan dikirim pesan
-namelist = ["Whatsapp Bot", "Catatan Penting"]
-while(1):
-    for name in namelist:
-        # Klik search bar
-        getsearchbox = driver.find_element_by_xpath("//*[@id='side']/div[1]/div/label/div/div[2]")
-        getsearchbox.click()
+reply = ['Hai kami sedang sibuk saat ini , tunggu beberapa saat lagi']
+while True:
+    try:
+        content = driver.find_element_by_xpath("//span[@class ='_38M1B']")
+        content.click()  # find the unread chat
+        input_form = driver.find_element_by_xpath('//div[@class="_2A8P4"]')
+        time.sleep(1)
+        input_form.send_keys(reply)
+        time.sleep(1)
+        input_form.send_keys(Keys.ENTER)
         time.sleep(2)
-
-        # Ketik nama yang ada dalam kontak
-        getsearchbox.send_keys(name)
-        time.sleep(3)
-
-        # Cek jika ada pesan yang belum dibaca
-        unreadMsgs = False
-
-        getlist = driver.find_elements_by_xpath("//span[@class ='_38M1B']")
-        if (len(getlist)):
-            unreadMsgs = True
-
-
-        # Jika tidak ada maka tombol back pada search bar akan di klik
-        if not unreadMsgs:
-            back = driver.find_element_by_xpath("//*[@id='side']/div[1]/div/button")
-            back.click()
-
-        # Jika ada maka akan mengirim pesan ke kontak tersebut
-        else:
-            # Klik chat
-            user = driver.find_element_by_xpath('//span[@title = "{}"]'.format(name))
-            user.click()
-
-            # Ketik pesan didalam kotak pesan
-            textbox = driver.find_element_by_xpath('//div[@class="_2A8P4"]')
-            textbox.send_keys(text1+name+text2)
-
-            # Kirim pesan
-            send = driver.find_element_by_xpath('//*[@id="main"]/footer/div[1]/div[3]/button')
-            send.click()
-
-            # Cetak nama kontak dalam log
-            print(name , "mengirim pesan kepadamu!")
-
-            time.sleep(5)
-
-    # code nya akan jalan lagi setelah 120 detik (2 menit)
-    time.sleep(120)
-
-driver.quit()
+    except Exception as e:
+        pass
